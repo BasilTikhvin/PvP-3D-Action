@@ -1,7 +1,6 @@
 using Mirror;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace PvP3DAction
 {
@@ -16,29 +15,36 @@ namespace PvP3DAction
         [SerializeField] private float _dashTime;
         [SerializeField] private float _hitTime;
 
-        private Rigidbody _rigidbody;
-        private Bot _enemy;
+        private LevelManager _levelManager;
+        public Vector3 StartPosition { get; set; }
 
-        private float InputeMouseX;
-        private float InputX;
-        private float InputZ;
+        private Rigidbody _rigidbody;
+
+        private Player _enemy;
+
+        public float InputeMouseX { get; set; }
+        public float InputX { get; set; }
+        public float InputZ { get; set; }
 
         private bool _isDashing;
         private float _dashTimer;
 
         private bool _isHit;
         public bool IsHit => _isHit;
-
         private float _hitTimer;
 
-        private int _dashHitsAmount;
-        public int DashHitsAmount => _dashHitsAmount;
+        public int DashHitsAmount { get; set; }
 
         private string _playerNameText;
+        public string PlayerNameText => _playerNameText;
 
         private void Start()
         {
             _rigidbody = transform.GetComponent<Rigidbody>();
+            StartPosition = transform.position;
+
+            _levelManager = GameObject.Find("LevelManager").GetComponent<LevelManager>();
+            _levelManager.AddPlayer(this);
         }
 
         public override void OnStartLocalPlayer()
@@ -59,21 +65,13 @@ namespace PvP3DAction
                 return;
             }
 
-            InputX = Input.GetAxis("Horizontal");
-            InputZ = Input.GetAxis("Vertical");
-            InputeMouseX = Input.GetAxis("Mouse X");
-
-            UpdateRigidbody();
-
-            OnScore();
-        }
-
-        private void UpdateRigidbody()
-        {
-            Turn();
             Move();
+
+            Turn();
+
             Dash();
-            Hit();
+
+            OnHit();
         }
 
         private void Move()
@@ -82,7 +80,6 @@ namespace PvP3DAction
             _rigidbody.AddForce(_moveSpeed * InputZ * Time.fixedDeltaTime * transform.forward, ForceMode.Force);
             _rigidbody.AddForce((_moveSpeed - _maxMoveSpeed) * Time.fixedDeltaTime * -_rigidbody.velocity, ForceMode.Force);
         }
-
 
         private void Turn()
         {
@@ -110,7 +107,7 @@ namespace PvP3DAction
             }
         }
 
-        private void Hit()
+        private void OnHit()
         {
             if (_hitTimer > 0)
             {
@@ -126,7 +123,7 @@ namespace PvP3DAction
             }    
         }
 
-        public void OnHit()
+        public void OnHitted()
         {
             _isHit = true;
 
@@ -145,16 +142,8 @@ namespace PvP3DAction
 
                     mesh.material.color = Color.red;
 
-                    _dashHitsAmount++;
+                    DashHitsAmount++;
                 }
-            }
-        }
-
-        private void OnScore()
-        {
-            if (_dashHitsAmount == 3)
-            {
-                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
         }
     } 
