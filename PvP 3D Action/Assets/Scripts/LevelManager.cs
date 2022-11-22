@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using Mirror;
 
 namespace PvP3DAction
 {
-    public class LevelManager : MonoBehaviour
+    public class LevelManager : NetworkBehaviour
     {
         [SerializeField] private TextMeshProUGUI[] _scoreListText;
         [SerializeField] private TextMeshProUGUI _winnerText;
@@ -57,7 +58,7 @@ namespace PvP3DAction
 
             foreach (Player player in _players)
             {
-                if (player.DashHitsAmount == 3)
+                if (player.DashHitsAmount >= 3)
                 {
                     _winner = player;
 

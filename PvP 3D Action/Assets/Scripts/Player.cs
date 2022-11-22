@@ -17,12 +17,8 @@ namespace PvP3DAction
 
         private LevelManager _levelManager;
         public Vector3 StartPosition { get; set; }
-
-        private Rigidbody _rigidbody;
-
-        private Player _enemy;
-
         public float InputeMouseX { get; set; }
+        public float InputeMouseY { get; set; }
         public float InputX { get; set; }
         public float InputZ { get; set; }
 
@@ -33,10 +29,16 @@ namespace PvP3DAction
         public bool IsHit => _isHit;
         private float _hitTimer;
 
+        private Rigidbody _rigidbody;
+        private Player _enemy;
+
         public int DashHitsAmount { get; set; }
 
         private string _playerNameText;
         public string PlayerNameText => _playerNameText;
+
+        private float _cameraRotationAngleY;
+        private Quaternion _cameraStartRotation;
 
         private void Start()
         {
@@ -52,6 +54,8 @@ namespace PvP3DAction
             Camera.main.transform.SetParent(transform);
             Camera.main.transform.localPosition = new Vector3(0, 2, -4);
 
+            _cameraStartRotation = Camera.main.transform.rotation;
+
             _playerNameText = $"Player{Random.Range(100, 999)}";
             transform.GetComponentInChildren<TextMeshPro>().text = _playerNameText;
         }
@@ -65,9 +69,9 @@ namespace PvP3DAction
                 return;
             }
 
-            Move();
+            PlayerCameraRotation();
 
-            Turn();
+            Move();
 
             Dash();
 
@@ -79,11 +83,18 @@ namespace PvP3DAction
             _rigidbody.AddForce(_moveSpeed * InputX * Time.fixedDeltaTime * transform.right, ForceMode.Force);
             _rigidbody.AddForce(_moveSpeed * InputZ * Time.fixedDeltaTime * transform.forward, ForceMode.Force);
             _rigidbody.AddForce((_moveSpeed - _maxMoveSpeed) * Time.fixedDeltaTime * -_rigidbody.velocity, ForceMode.Force);
+
+            transform.rotation *= Quaternion.AngleAxis(InputeMouseX * _turnSpeed * Time.fixedDeltaTime, Vector3.up);
         }
 
-        private void Turn()
+
+        private void PlayerCameraRotation()
         {
-            transform.rotation *= Quaternion.AngleAxis(InputeMouseX * _turnSpeed * Time.fixedDeltaTime, Vector3.up);
+            _cameraRotationAngleY += InputeMouseY;
+
+            Quaternion rotationY = Quaternion.AngleAxis(Mathf.Clamp(-_cameraRotationAngleY, -25, 25), Vector3.right);
+
+            Camera.main.transform.localRotation = _cameraStartRotation * rotationY;
         }
 
         private void Dash()
@@ -120,7 +131,7 @@ namespace PvP3DAction
                 MeshRenderer mesh = GetComponent<MeshRenderer>();
 
                 mesh.material.color = Color.green;
-            }    
+            }
         }
 
         public void OnHitted()
@@ -136,7 +147,7 @@ namespace PvP3DAction
             {
                 if (_enemy.IsHit == false)
                 {
-                    _enemy.OnHit();
+                    _enemy.OnHitted();
 
                     MeshRenderer mesh = _enemy.GetComponent<MeshRenderer>();
 
@@ -145,6 +156,14 @@ namespace PvP3DAction
                     DashHitsAmount++;
                 }
             }
+        }
+
+        [Command]
+        public void CmdSetupPlater(bool dash, bool hit, string name)
+        {
+            _isDashing = dash;
+            _isHit = hit;
+            _playerNameText = name;
         }
     } 
 }

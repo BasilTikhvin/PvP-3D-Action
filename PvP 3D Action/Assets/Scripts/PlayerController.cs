@@ -1,3 +1,4 @@
+using Mirror;
 using UnityEngine;
 
 namespace PvP3DAction
@@ -16,6 +17,9 @@ namespace PvP3DAction
             _player.InputX = Input.GetAxis("Horizontal");
             _player.InputZ = Input.GetAxis("Vertical");
             _player.InputeMouseX = Input.GetAxis("Mouse X");
+            _player.InputeMouseY = Input.GetAxis("Mouse Y");
+
+            Cursor.lockState = CursorLockMode.Locked;
         }
     }
 }
