@@ -10,6 +10,7 @@ namespace PvP3DAction
         [SerializeField] private TextMeshProUGUI[] _scoreListText;
         [SerializeField] private TextMeshProUGUI _winnerText;
         [SerializeField] private float _restartTime;
+        [SerializeField] private int _hitsToWin;
 
         private List<Player> _players = new();
         private Player _winner;
@@ -26,10 +27,7 @@ namespace PvP3DAction
         {
             if (_players.Count == 0) return;
 
-            for (int i = 0; i < _players.Count; i++)
-            {
-                _scoreListText[i].text = $"{_players[i].PlayerNameText}:   {_players[i].DashHitsAmount}\n";
-            }
+            RpcViewScoreList();
 
             if (_isScoreReached)
             {
@@ -52,13 +50,22 @@ namespace PvP3DAction
             CheckScore();
         }
 
+        [ClientRpc]
+        public void RpcViewScoreList()
+        {
+            for (int i = 0; i < _players.Count; i++)
+            {
+                _scoreListText[i].text = $"{_players[i].PlayerNameText}:   {_players[i].DashHitsAmount}\n";
+            }
+        }
+
         private void CheckScore()
         {
             if (_isScoreReached == true) return;            
 
             foreach (Player player in _players)
             {
-                if (player.DashHitsAmount >= 3)
+                if (player.DashHitsAmount >= _hitsToWin)
                 {
                     _winner = player;
 
@@ -79,7 +86,7 @@ namespace PvP3DAction
             {
                 player.transform.position = player.StartPosition;
 
-                player.DashHitsAmount = 0;
+                player.DashHitsReset();
             }
         }
 

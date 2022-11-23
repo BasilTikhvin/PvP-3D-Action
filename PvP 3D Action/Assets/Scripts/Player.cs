@@ -7,6 +7,7 @@ namespace PvP3DAction
     public class Player : NetworkBehaviour
     {
         [SerializeField] private GameObject _playerName;
+        [SerializeField] private Animator _playerAnimator;
 
         [SerializeField] private float _moveSpeed;
         [SerializeField] private float _maxMoveSpeed;
@@ -15,28 +16,31 @@ namespace PvP3DAction
         [SerializeField] private float _dashTime;
         [SerializeField] private float _hitTime;
 
-        private LevelManager _levelManager;
+        [SyncVar]
+        private int _dashHitsAmount;
+        public int DashHitsAmount => _dashHitsAmount;
+
+        [SyncVar]
+        private string _playerNameText;
+        public string PlayerNameText => _playerNameText;
+
+        [SyncVar]
+        private bool _isDashing;
+        private float _dashTimer;
+
+        [SyncVar]
+        private bool _isHit;
+        private float _hitTimer;
+
         public Vector3 StartPosition { get; set; }
         public float InputeMouseX { get; set; }
         public float InputeMouseY { get; set; }
         public float InputX { get; set; }
         public float InputZ { get; set; }
 
-        private bool _isDashing;
-        private float _dashTimer;
-
-        private bool _isHit;
-        public bool IsHit => _isHit;
-        private float _hitTimer;
-
+        private LevelManager _levelManager;
         private Rigidbody _rigidbody;
         private Player _enemy;
-
-        public int DashHitsAmount { get; set; }
-
-        private string _playerNameText;
-        public string PlayerNameText => _playerNameText;
-
         private float _cameraRotationAngleY;
         private Quaternion _cameraStartRotation;
 
@@ -56,18 +60,22 @@ namespace PvP3DAction
 
             _cameraStartRotation = Camera.main.transform.rotation;
 
-            _playerNameText = $"Player{Random.Range(100, 999)}";
-            transform.GetComponentInChildren<TextMeshPro>().text = _playerNameText;
+            _playerNameText = $"Player {Random.Range(100, 999)}";
+            _playerName.GetComponentInChildren<TextMeshPro>().text = _playerNameText;
+
+            CmdPlayerName(_playerNameText);
         }
 
         void Update()
         {
-            if (!isLocalPlayer)
+            if (isLocalPlayer == false)
             {
                 _playerName.transform.LookAt(Camera.main.transform);
 
                 return;
             }
+
+            _playerName.transform.LookAt(Camera.main.transform);
 
             PlayerCameraRotation();
 
@@ -75,7 +83,7 @@ namespace PvP3DAction
 
             Dash();
 
-            OnHit();
+            AfterHit();
         }
 
         private void Move()
@@ -106,6 +114,8 @@ namespace PvP3DAction
             else
             {
                 _isDashing = false;
+
+                CmdIsDashingSync(_isDashing);
             }
 
             if (Input.GetKeyDown(KeyCode.Mouse0) && _isDashing == false)
@@ -115,10 +125,17 @@ namespace PvP3DAction
                 _rigidbody.AddForce(transform.forward * _dashForce, ForceMode.Impulse);
 
                 _isDashing = true;
+
+                CmdIsDashingSync(_isDashing);
             }
         }
 
-        private void OnHit()
+        public void DashHitsReset()
+        {
+            _dashHitsAmount = 0;
+        }
+
+        private void AfterHit()
         {
             if (_hitTimer > 0)
             {
@@ -128,42 +145,56 @@ namespace PvP3DAction
             {
                 _isHit = false;
 
-                MeshRenderer mesh = GetComponent<MeshRenderer>();
-
-                mesh.material.color = Color.green;
+                CmdIsHitSync(_isHit);
             }
         }
 
-        public void OnHitted()
+        public void OnHit()
         {
             _isHit = true;
 
             _hitTimer = _hitTime;
+
+            CmdIsHitSync(_isHit);
+
+            _playerAnimator.SetTrigger("hit");
         }
 
         private void OnCollisionEnter(Collision collision)
         {
             if (collision.transform.TryGetComponent(out _enemy) && _isDashing)
             {
-                if (_enemy.IsHit == false)
+                if (_enemy._isHit == false)
                 {
-                    _enemy.OnHitted();
+                    _enemy.OnHit();
 
-                    MeshRenderer mesh = _enemy.GetComponent<MeshRenderer>();
-
-                    mesh.material.color = Color.red;
-
-                    DashHitsAmount++;
+                    CmdAddDashHit();
                 }
             }
         }
 
         [Command]
-        public void CmdSetupPlater(bool dash, bool hit, string name)
+        public void CmdAddDashHit()
         {
-            _isDashing = dash;
-            _isHit = hit;
+            _dashHitsAmount++;
+        }
+
+        [Command]
+        public void CmdPlayerName(string name)
+        {
             _playerNameText = name;
+        }
+
+        [Command]
+        public void CmdIsHitSync(bool isHit)
+        {
+            _isHit = isHit;
+        }
+
+        [Command]
+        public void CmdIsDashingSync(bool isDashing)
+        {
+            _isDashing = isDashing;
         }
     } 
 }

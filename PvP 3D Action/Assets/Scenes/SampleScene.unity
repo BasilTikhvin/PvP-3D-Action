@@ -163,6 +163,7 @@ MonoBehaviour:
   - {fileID: 1154012575}
   _winnerText: {fileID: 1652379579}
   _restartTime: 5
+  _hitsToWin: 3
 --- !u!4 &58971781
 Transform:
   m_ObjectHideFlags: 0
@@ -190,7 +191,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneId: 638911411
+  sceneId: 4230861638
   _assetId: 0
   serverOnly: 0
   visible: 0
@@ -228,7 +229,7 @@ Transform:
   - {fileID: 1473392908}
   - {fileID: 575315305}
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &208401815
 GameObject:
@@ -747,7 +748,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &446743383
 MonoBehaviour:
@@ -1200,7 +1201,7 @@ RectTransform:
   - {fileID: 647011035}
   - {fileID: 908019287}
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -2567,7 +2568,7 @@ Transform:
   - {fileID: 1354220528}
   - {fileID: 1013992311}
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2098335220
 GameObject:

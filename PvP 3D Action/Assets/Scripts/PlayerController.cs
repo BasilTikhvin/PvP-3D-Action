@@ -1,4 +1,3 @@
-using Mirror;
 using UnityEngine;
 
 namespace PvP3DAction
