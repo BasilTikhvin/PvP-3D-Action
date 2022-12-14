@@ -32,7 +32,7 @@ namespace PvP3DAction
         private bool _isHit;
         private float _hitTimer;
 
-        public Vector3 StartPosition { get; set; }
+        public Vector3 StartPosition { get; private set; }
         public float InputeMouseX { get; set; }
         public float InputeMouseY { get; set; }
         public float InputX { get; set; }
